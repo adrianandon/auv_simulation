@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <memory>
+#include "PressureSensor.hpp"
 
 class AUV_Controller {
 public:
