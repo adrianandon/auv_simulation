@@ -1,7 +1,6 @@
-class Altimeter {
-public:
-    float GetHeightAboveSeafloor() {
-        // Return height above seafloor in meters.
-        return 50.0 - GetDepth();  // Assuming max depth is 50 meters.
-    }
-};
+#include "Altimeter.hpp"
+
+float Altimeter::GetHeight() {
+    // Return height above seafloor in meters.
+    return connection->GetHeight();
+}

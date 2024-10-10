@@ -1,3 +1,6 @@
+#ifndef PRESSURESENSORCONNECTION_HPP
+#define PRESSURESENSORCONNECTION_HPP
+
 #include <cstdint>
 
 class PressureSensorConnection 
@@ -6,3 +9,4 @@ class PressureSensorConnection
     virtual uint16_t GetPressure() = 0;  
     virtual float getVoltage() = 0; 
 };
+#endif

@@ -1,3 +1,6 @@
+#ifndef PRESSURE_SENSOR_HPP
+
+#define PRESSURE_SENSOR_HPP
 #include "PressureSensorConnection.hpp"
 #include <memory>
 
@@ -8,3 +11,4 @@ public:
 protected:
     std::shared_ptr<PressureSensorConnection> connection;
 };
+#endif // PRESSURE_SENSOR_HPP
