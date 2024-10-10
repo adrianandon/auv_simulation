@@ -3,8 +3,9 @@
 
 class ThrusterControl {
     public: 
-    void GoUp() = 0;
-    void GoDown() = 0;
-    void MantainDepth() = 0;
+    virtual ~ThrusterControl() = default;
+    virtual void GoUp() = 0;
+    virtual void GoDown() = 0;
+    virtual void MaintainDepth() = 0;
 };
 #endif

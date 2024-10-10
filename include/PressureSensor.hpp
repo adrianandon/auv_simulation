@@ -7,7 +7,7 @@
 class PressureSensor {
 public:
     PressureSensor(std::shared_ptr<PressureSensorConnection> connection) : connection(connection) {}
-    virtual float GetDepth() = 0;  // Returns depth in meters.
+    virtual float GetDepth() = 0;
 protected:
     std::shared_ptr<PressureSensorConnection> connection;
 };

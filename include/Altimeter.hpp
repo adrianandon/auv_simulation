@@ -7,7 +7,7 @@
 class Altimeter {
 public:
     Altimeter(std::shared_ptr<AltimeterConnection> connection) : connection(connection) {}
-    float GetHeight();  // Returns depth in meters.
+    float GetHeight();
 protected:
     std::shared_ptr<AltimeterConnection> connection;
 };

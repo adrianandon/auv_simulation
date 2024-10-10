@@ -3,31 +3,67 @@
 #include <chrono>
 #include <memory>
 #include "PressureSensor.hpp"
+#include "AUV_Controller.hpp"
 
 
+bool AUV_Controller::executeMissionPlan() {
+    
+    if(currentOperation == nullptr)
+        if(missionPlan.isEmpty())
+            return false;
+        else
+            currentOperation = std::make_shared<std::pair<MissionOperation, double>>(missionPlan.getNextMissionOperation());
+    
+    switch (currentOperation->first)
+    {
+        case MissionOperation::REACH_HEIGHT:
+            if(reachHeightAboveSeafloor(currentOperation->second))
+                currentOperation = nullptr;
+            break;
+        case MissionOperation::REACH_DEPTH:
+            if(reachDepthBelowSurface(currentOperation->second))
+                currentOperation = nullptr;
+            break;
+        case MissionOperation::HOLD_POSITION:
+            holdPosition(currentOperation->second);
+            currentOperation = nullptr;
+            break;
 
-// Simulates diving to a specific height above the seafloor
-void AUV_Controller::diveToHeightAboveSeafloor(double heightAboveSeafloor) {
-    double targetDepth = 50.0 - heightAboveSeafloor; // Seafloor is at 50 meters
-    while (pressureSensor->GetDepth() < targetDepth) {
-        thrusterControl->GoDown();
-        reportStatus("Diving", targetDepth);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    thrusterControl->MaintainDepth();
+    };
+    return true;
 }
 
-// Simulates ascending to a specific depth
-void AUV_Controller::ascendToDepth(double targetDepth) {
-    while (pressureSensor->GetDepth() > targetDepth) {
+bool AUV_Controller::reachHeightAboveSeafloor(double targetHeight) {
+    double currentHeight = altimeter->GetHeight();
+    if (currentHeight < targetHeight) {
         thrusterControl->GoUp();
-        reportStatus("Ascending", targetDepth);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        reportStatus("Ascending ", targetHeight);
+    } else if (currentHeight > targetHeight) {
+        thrusterControl->GoDown();
+        reportStatus("Diving ", targetHeight);
+    } else {
+        return true; // Target height reached
     }
-    thrusterControl->MaintainDepth();
+    return false; // Target height not reached yet
 }
 
-// Holds the current position for a certain duration (in seconds)
+bool AUV_Controller::reachDepthBelowSurface(double targetDepth) {
+    double currentDepth = pressureSensor->GetDepth();
+    if (currentDepth < targetDepth) {
+        thrusterControl->GoDown();
+        reportStatus("Diving ", targetDepth);
+
+    } else if (currentDepth > targetDepth) {
+        reportStatus("Ascending ", targetDepth);
+
+        thrusterControl->GoUp();
+    } else {
+        return true; // Target depth reached
+    }
+    return false; // Target depth not reached yet
+}
+
+
 void AUV_Controller::holdPosition(int seconds) {
     for (int i = 0; i < seconds; ++i) {
         thrusterControl->MaintainDepth();
@@ -36,11 +72,9 @@ void AUV_Controller::holdPosition(int seconds) {
     }
 }
 
-// Reports the current AUV status to the console
 void AUV_Controller::reportStatus(const std::string& operation, double targetDepth) {
     double currentDepth = pressureSensor->GetDepth();
-    double heightAboveSeafloor = altimeter->GetHeight();  // Altimeter returns height above seafloor
+    double heightAboveSeafloor = altimeter->GetHeight();
     std::cout << "[" << operation << "][ " << targetDepth << "m ][ " << currentDepth << "m ][ " 
                 << heightAboveSeafloor << "m ]" << std::endl;
 }
-

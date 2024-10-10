@@ -7,29 +7,28 @@
 #include "Altimeter.hpp"
 #include "PressureSensor.hpp"
 #include "ThrusterControl.hpp"
+#include "MissionPlan.hpp"
+
 
 class AUV_Controller {
 public:
-    AUV_Controller(std::shared_ptr<PressureSensor> pressureSensor, std::shared_ptr<Altimeter> altimeter, std::shared_ptr<ThrusterControl> thrusterControl)
-        : pressureSensor(pressureSensor), altimeter(altimeter), thrusterControl(thrusterControl) {}
+    AUV_Controller(std::shared_ptr<PressureSensor> pressureSensor, std::shared_ptr<Altimeter> altimeter, 
+    std::shared_ptr<ThrusterControl> thrusterControl, MissionPlan& missionPlan)
+        : pressureSensor(pressureSensor), altimeter(altimeter), thrusterControl(thrusterControl),
+        missionPlan(missionPlan) {}
 
-    void executeMission();
+    bool executeMissionPlan();
 
 private:
     std::shared_ptr<PressureSensor> pressureSensor;
     std::shared_ptr<Altimeter> altimeter;
     std::shared_ptr<ThrusterControl> thrusterControl;
+    std::shared_ptr<std::pair<MissionOperation, double>> currentOperation;
+    MissionPlan missionPlan;
 
-    // Simulates diving to a specific height above the seafloor
-    void diveToHeightAboveSeafloor(double heightAboveSeafloor);
-
-    // Simulates ascending to a specific depth
-    void ascendToDepth(double targetDepth);
-
-    // Holds the current position for a certain duration (in seconds)
-    void holdPosition(int seconds) ;
-
-    // Reports the current AUV status to the console
+    bool reachHeightAboveSeafloor(double targetHeight);
+    bool reachDepthBelowSurface(double targetDepth);
+    void holdPosition(int seconds);
     void reportStatus(const std::string& operation, double targetDepth);
 };
 #endif // AUV_CONTROLLER_HPP
