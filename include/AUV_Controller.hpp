@@ -26,6 +26,7 @@ private:
     std::shared_ptr<std::pair<MissionOperation, double>> currentOperation;
     MissionPlan missionPlan;
 
+    bool reachTarget(double targetValue, double currentValue, bool isDepth);    
     bool reachHeightAboveSeafloor(double targetHeight);
     bool reachDepthBelowSurface(double targetDepth);
     void holdPosition(int seconds);

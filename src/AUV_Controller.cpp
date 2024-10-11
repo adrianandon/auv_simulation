@@ -2,8 +2,11 @@
 #include <thread>
 #include <chrono>
 #include <memory>
+#include <iomanip>
+
 #include "PressureSensor.hpp"
 #include "AUV_Controller.hpp"
+
 
 
 bool AUV_Controller::executeMissionPlan() {
@@ -33,36 +36,38 @@ bool AUV_Controller::executeMissionPlan() {
     return true;
 }
 
+bool AUV_Controller::reachTarget(double targetValue, double currentValue, bool isDepth) {
+    if (currentValue < targetValue) {
+        if (isDepth) {
+            reportStatus("Descending ", targetValue);
+            thrusterControl->GoDown();
+        } else {
+            reportStatus("Ascending ", targetValue);
+            thrusterControl->GoUp();
+        }
+    } else if (currentValue > targetValue) {
+        if (isDepth) {
+            reportStatus("Ascending ", targetValue);
+            thrusterControl->GoUp();
+        } else {
+            reportStatus("Descending ", targetValue);
+            thrusterControl->GoDown();
+        }
+    } else {
+        return true; // Target value reached
+    }
+    return false; // Target value not reached yet
+}
+
 bool AUV_Controller::reachHeightAboveSeafloor(double targetHeight) {
     double currentHeight = altimeter->GetHeight();
-    if (currentHeight < targetHeight) {
-        thrusterControl->GoUp();
-        reportStatus("Ascending ", targetHeight);
-    } else if (currentHeight > targetHeight) {
-        thrusterControl->GoDown();
-        reportStatus("Diving ", targetHeight);
-    } else {
-        return true; // Target height reached
-    }
-    return false; // Target height not reached yet
+    return reachTarget(targetHeight, currentHeight, false);
 }
 
 bool AUV_Controller::reachDepthBelowSurface(double targetDepth) {
-    double currentDepth = pressureSensor->GetDepth();
-    if (currentDepth < targetDepth) {
-        thrusterControl->GoDown();
-        reportStatus("Diving ", targetDepth);
-
-    } else if (currentDepth > targetDepth) {
-        reportStatus("Ascending ", targetDepth);
-
-        thrusterControl->GoUp();
-    } else {
-        return true; // Target depth reached
-    }
-    return false; // Target depth not reached yet
+     double currentDepth = pressureSensor->GetDepth();
+     return reachTarget(targetDepth, currentDepth, true);
 }
-
 
 void AUV_Controller::holdPosition(int seconds) {
     for (int i = 0; i < seconds; ++i) {
@@ -75,6 +80,8 @@ void AUV_Controller::holdPosition(int seconds) {
 void AUV_Controller::reportStatus(const std::string& operation, double targetDepth) {
     double currentDepth = pressureSensor->GetDepth();
     double heightAboveSeafloor = altimeter->GetHeight();
+
+    std::cout << std::fixed << std::setprecision(1);
     std::cout << "[" << operation << "][ " << targetDepth << "m ][ " << currentDepth << "m ][ " 
                 << heightAboveSeafloor << "m ]" << std::endl;
 }

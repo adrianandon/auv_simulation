@@ -7,7 +7,13 @@
 #include "AltimeterConnection.hpp"
 #include "PressureSensorConnection.hpp"
 #include "MissionPlan.hpp"
+#include "PressureSensor.hpp"
 
+
+enum class PressureSensorType {
+    DIGITAL,
+    ANALOG
+};
 
 struct SimulationParameters
 {
@@ -15,7 +21,9 @@ struct SimulationParameters
     float ascentRate = 1.0f;//Ascent rate in meters per second
     float seabedDepth = 50.0f;//Depth of the seabed in meters
     int simulationUpdateInterval = 1;//Interval in seconds between simulation updates
+    PressureSensorType pressureSensorType = PressureSensorType::DIGITAL;
 };
+
 
 class WaterDepthSimulation : public ThrusterControl, public AltimeterConnection, 
                                 public PressureSensorConnection, public std::enable_shared_from_this<WaterDepthSimulation>
@@ -38,6 +46,9 @@ public:
     uint16_t GetPressure() override;
     float getVoltage() override;
 private:
+
+    std::shared_ptr<PressureSensor> createPressureSensor(PressureSensorType, 
+    std::shared_ptr<PressureSensorConnection> connection);
     uint16_t digitalPressureSensorReading = 0;
     float analogPressureSensorReading = 0.0f;
     float heightReading;
