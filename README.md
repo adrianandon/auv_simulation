@@ -1,2 +1,2 @@
 # auv_simulation
-Simple Simulation for an AUV
+A simple simulation for an AUV (Autonomus Underwater Vehicle).
